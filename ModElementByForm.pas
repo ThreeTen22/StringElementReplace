@@ -24,8 +24,8 @@ const
        ModTypes = '[mtApp]';	
          ModEVs = 'Generic\Scenes'; 
       IgnModEVs = false;
-    IgnEmptyEVs = false;
-       TestMode = true;
+    IgnEmptyEVs = true;
+       TestMode = false;
 
 //----- Reference --------
 {
@@ -230,7 +230,7 @@ Function DoTestMode(sBefore,sAfter:String):Boolean;
 		if (TestMode = false) then exit;
 		Result := true;
 		AddMessage('     Before: '+ sBefore);
-		AddMessage('      After: '+ sAfter);
+		AddMessage('     After:	'+ sAfter);
 	end;
 	
 procedure ReadOutSl(prepend: String; sl:TStringList);
