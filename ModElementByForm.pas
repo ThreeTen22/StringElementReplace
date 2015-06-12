@@ -192,48 +192,37 @@ Procedure ModifyRecord(iRecord: IInterface;slMEs,slMTs,slMEVs:TStringList);
 
 Procedure ModifyElement(iElement: IInterface; sMT,sMEV:String);
 	var
-		sEV: String;
+		sEV,sEVReplace: String;
 	begin
 		sEV := GetEditValue(iElement);
 		if IgnModEVs then begin
 			if GetElementState(iElement, esModified) <> 0 then begin
-			if TestMode then AddMessage('     Already Modified: Skipping');
-			exit;	
+			  if TestMode then AddMessage('     Already Modified: Skipping');
+			  exit;	
 			end; 
 		end;
 		if SameText(sMT,'[mtOv]') then begin
-			if TestMode then begin
-				AddMessage('     Before: '+ sEV);
-				AddMessage('      After: '+ sMEV);
-				Exit;
-			end;
-			if SameText(sMEV,'[Empty]') then 
-				Remove(iElement)
-			else 
-				SetEditValue(iElement,sMEV);
+			sEVReplace := sMEV;
 		end else
 		if SameText(sMT,'[mtApp]') then begin
-			if TestMode then begin
-				AddMessage('     Before: '+ sEV);
-				AddMessage('      After: '+ sEV+sMEV);
-				Exit;
-			end;
-			if SameText(sMEV,'[Empty]') then 
-				Exit
-			else 
-				SetEditValue(iElement, sEV+sMEV);
+			sEVReplace := sEV+sMEV;
 		end else
 		if SameText(sMT,'[mtPre]') then begin
-			if TestMode then begin
-				AddMessage('     Before: '+ sEV);
-				AddMessage('      After: '+ sMEV+sEV);
-				Exit;
-			end;
-			if SameText(sMEV,'[Empty]') then 
-				Exit
-			else 
-				SetEditValue(iElement, sMEV+sEV);
+			sEVReplace := sMEV+sEV;
+		end else begin
+			sEVReplace := StringReplace(sEV,sMT,sMEV,[rfReplaceAll, rfIgnoreCase]);
 		end;
-		
+		if DoTestMode(sEV,sEVReplace) then exit;
+		if SameText(sEVReplace,'[Empty]') then RemoveNode(iElement) else
+			SetEditValue(iElement,sEVReplace);
+	end;
+	
+Function DoTestMode(sBefore,sAfter):Boolean;
+	begin
+		Result := false;
+		if (TestMode = false) then exit;
+		Result := true;
+		AddMessage('     Before: '+ sBefore);
+		AddMessage('      After: '+ sAfter);
 	end;
 end.
