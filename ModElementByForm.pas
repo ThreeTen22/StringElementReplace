@@ -233,7 +233,7 @@ Procedure ModifyElement(iElement: IInterface; sMT,sMEV:String);
 			SetEditValue(iElement,sEVReplace);
 	end;
 	
-Function DoTestMode(sBefore,sAfter):Boolean;
+Function DoTestMode(sBefore,sAfter:String):Boolean;
 	begin
 		Result := false;
 		if (TestMode = false) then exit;
