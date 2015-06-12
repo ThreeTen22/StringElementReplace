@@ -6,7 +6,7 @@ unit ModElementByForm;
 uses mteFunctions;
 const
 //---------File Selection ---------------
-	    Files = 'yourmod.esp';
+	    Files = '';
 
 //---------Record Selection----------------
     RecordType = 'QUST';
@@ -27,6 +27,16 @@ const
     IgnEmptyEVs = false;
        TestMode = true;
 
+//----- Reference --------
+{
+ModTypes:
+[mtOv]
+[mtApp]
+[mtPre]
+
+ModEditValues:
+[Empty]
+}
 
 var
 	slFiles,slSearchIn,slCheckFor,slModElements,slModTypes,slModEVs,slQueue: TStringList;
