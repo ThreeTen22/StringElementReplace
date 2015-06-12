@@ -221,6 +221,10 @@ Procedure ModifyElement(iElement: IInterface; sMT,sMEV:String);
 		end else
 		if SameText(sMT,'[mtPre]') then begin
 			sEVReplace := sMEV+sEV;
+		end else
+		if SameText(sMT,'[Empty]') then begin
+			if SameText(sEV,'') then sEVReplace := sMEV
+			else Exit;
 		end else begin
 			sEVReplace := StringReplace(sEV,sMT,sMEV,[rfReplaceAll, rfIgnoreCase]);
 		end;
