@@ -104,16 +104,6 @@ Procedure ClearGlobals();
 		slModEVs.free;
 	end;
 
-procedure ReadOutSl(prepend: String; sl:TStringList);
-	var
-		i: Integer;
-	begin
-		for i := 0 to Pred(sl.Count) do begin
-			AddMessage(prepend+' '+sl[i]);
-		end;
-	end;
-
-
 Procedure GrabRecordsInFile(iFile:IInterface;sGRUP:String;bOverrides:Boolean;slQ:TStringList);
 	var
 		i:Integer;
@@ -240,5 +230,14 @@ Function DoTestMode(sBefore,sAfter:String):Boolean;
 		Result := true;
 		AddMessage('     Before: '+ sBefore);
 		AddMessage('      After: '+ sAfter);
+	end;
+	
+procedure ReadOutSl(prepend: String; sl:TStringList);
+	var
+		i: Integer;
+	begin
+		for i := 0 to Pred(sl.Count) do begin
+			AddMessage(prepend+' '+sl[i]);
+		end;
 	end;
 end.
