@@ -29,13 +29,15 @@ const
 
 //----- Reference --------
 {
+Note: Theses are case sensative
 ModTypes:
 [mtOv]
 [mtApp]
 [mtPre]
 
-ModEditValues:
+ModEVs:
 [Empty]
+
 }
 
 var
