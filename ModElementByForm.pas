@@ -14,15 +14,15 @@ const
   IgnModRecords = false;     
 
 //------ Element/Comparison Selection ----------
-       SearchIn = 'EDID,FULL';
-       CheckFor = 'Quest,Quest';
+       SearchIn = 'EDID';
+       CheckFor = 'Quest';
 //------ Element Comparisons ----------
   LogicOperator = 'lAND';
 
 //------ Element Modifications -------
     ModElements = 'FLTR';
-       ModTypes = '[mtApp]';	
-         ModEVs = 'Generic\Scenes'; 
+       ModTypes = '[mtOv]';	
+         ModEVs = '[Empty]'; 
       IgnModEVs = false;
     IgnEmptyEVs = true;
        TestMode = false;
@@ -38,7 +38,6 @@ ModTypes:
 
 ModEVs:
 [Empty]
-
 }
 
 var
@@ -93,6 +92,7 @@ function Finalize: integer;
 		end;
 		slTemp.free;
 		ClearGlobals()
+		RemoveFilter();
 	end;
 
 Procedure ClearGlobals();
