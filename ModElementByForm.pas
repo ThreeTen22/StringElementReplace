@@ -91,7 +91,7 @@ function Finalize: integer;
 			ModifyRecord(iRecord,slModElements,slModTypes,slModEVs);
 		end;
 		slTemp.free;
-		ClearGlobals()
+		ClearGlobals();
 		RemoveFilter();
 	end;
 
