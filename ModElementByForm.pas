@@ -21,10 +21,10 @@ const
 
 //------ Element Modifications -------
     ModElements = 'FLTR';
-       ModTypes = '[mtOv]';	
-         ModEVs = '[Empty]'; 
+       ModTypes = 'Cyrodiil\';	
+         ModEVs = 'Nope\'; 
       IgnModEVs = false;
-    IgnEmptyEVs = true;
+    IgnEmptyEVs = false;
        TestMode = false;
 
 //----- Reference --------
@@ -73,11 +73,17 @@ function Finalize: integer;
 		slTemp := TStringList.Create;
 		Result := 0;
 		ReadOutSl('slFiles:',slFiles);
+		AddMessage('Record: '+ RecordType);
+		AddMessage('IgnOverrides: '+BoolToStr(IgnOverrides));
+		AddMessage('IgnModRecords: '+BoolToStr(IgnModRecords));
 		ReadOutSl('slSearchIn:',slSearchIn);
 		ReadOutSl('slCheckFor:', slCheckFor);
 		ReadOutSl('slModElements:', slModElements);
 		ReadOutSl('slModTypes:', slModTypes);
 		ReadOutSl('slModEVs:', slModEVs);
+		AddMessage('IgnModEVs: '+BoolToStr(IgnModEVs));
+		AddMessage('IgnEmptyEVs: '+BoolToStr(IgnEmptyEVs));
+		AddMessage('TestMode: '+BoolToStr(TestMode));
 		for i:=0 to Pred(slFiles.Count) do begin
 			iFile := ObjectToElement(slFiles.Objects[i]);
 			GrabRecordsInFile(iFile,RecordType,IgnOverrides,slQueue);
@@ -183,19 +189,20 @@ Procedure ModifyRecord(iRecord: IInterface;slMEs,slMTs,slMEVs:TStringList);
 			iElement := ElementByPath(iRecord,slMEs[i]);
 			if Assigned(iElement) then begin
 				if TestMode then AddMessage('Modifying Element: '+Name(iElement));
-				ModifyElement(iElement,slMTs[i],slMEVs[i]);
+				ModifyElement(iRecord,iElement,slMTs[i],slMEs[i],slMEVs[i]);
 			end else
 			if (IgnEmptyEVs = false) then begin
 				if TestMode then AddMessage('Modifying Element: '+Name(iElement));
 				iElement := Add(iRecord, slMEs[i], false);
-				ModifyElement(iElement,slMTs[i],slMEVs[i]);
+				ModifyElement(iRecord,iElement,slMTs[i],slMEs[i],slMEVs[i]);
 			end;
 		end; 
 	end;
 
-Procedure ModifyElement(iElement: IInterface; sMT,sMEV:String);
+Procedure ModifyElement(iRecord,iElement:IInterface;sMT,sME,sMEV:String);
 	var
 		sEV,sEVReplace: String;
+		iNewElement: IInterface;
 	begin
 		sEV := GetEditValue(iElement);
 		if IgnModEVs then begin
@@ -220,15 +227,17 @@ Procedure ModifyElement(iElement: IInterface; sMT,sMEV:String);
 			sEVReplace := StringReplace(sEV,sMT,sMEV,[rfReplaceAll, rfIgnoreCase]);
 		end;
 		if DoTestMode(sEV,sEVReplace) then exit;
-		if SameText(sEVReplace,'[Empty]') then RemoveNode(iElement) else
-			SetEditValue(iElement,sEVReplace);
+		if SameText(sEVReplace,'[Empty]') then RemoveNode(iElement) else begin
+			RemoveNode(iElement);
+			iNewElement := Add(iRecord, sME, false);
+			SetEditValue(iNewElement,sEVReplace);
+		end;
 	end;
 	
 Function DoTestMode(sBefore,sAfter:String):Boolean;
 	begin
-		Result := false;
-		if (TestMode = false) then exit;
-		Result := true;
+		Result := TestMode;
+		if (Result = false) then exit;
 		AddMessage('     Before: '+ sBefore);
 		AddMessage('     After:	'+ sAfter);
 	end;
