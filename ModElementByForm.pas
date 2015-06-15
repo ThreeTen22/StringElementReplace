@@ -9,23 +9,24 @@ const
 	    Files = '';
 
 //---------Record Selection----------------
-    RecordType = 'QUST';
-   IgnOverrides = true;
+     RecordType = 'QUST';
+   IgnOverrides = false;
   IgnModRecords = false;     
 
 //------ Element/Comparison Selection ----------
        SearchIn = 'EDID';
-       CheckFor = 'Quest';
+       CheckFor = 'Bruma';
 //------ Element Comparisons ----------
-  LogicOperator = 'lAND';
+  LogicOperator = 'lOR';
 
 //------ Element Modifications -------
-    ModElements = 'FLTR';
-       ModTypes = 'Cyrodiil\';	
-         ModEVs = 'Nope\'; 
+    ModElements = 'FULL';
+       ModTypes = '[mtApp]';	
+         ModEVs = ': This is A Test'; 
       IgnModEVs = false;
     IgnEmptyEVs = false;
        TestMode = false;
+     DebugLevel = 3;
 
 //----- Reference --------
 {
@@ -39,9 +40,9 @@ ModTypes:
 ModEVs:
 [Empty]
 }
-
+Dash = '----------------:';
 var
-	slFiles,slSearchIn,slCheckFor,slModElements,slModTypes,slModEVs,slQueue: TStringList;
+	slFiles,slSearchIn,slCheckFor,slModElements,slModTypes,slModEVs,slQueue, slNextQueue: TStringList;
 
 
 function Initialize: integer;
@@ -53,13 +54,14 @@ function Initialize: integer;
 		slModTypes := TStringList.Create; 	 slModTypes.StrictDelimiter := true; 	slModTypes.DelimitedText := ModTypes;	
 		slModEVs := TStringList.Create; 	 slModEVs.StrictDelimiter := true; 		slModEVs.DelimitedText := ModEVs;
 		slQueue := TStringList.Create;		 slQueue.StrictDelimiter := true;
+		slNextQueue := TStringList.Create;	 slNextQueue.StrictDelimiter := true;
 		ScriptProcessElements := [etFile];
 	  Result := 0;
 	end;
 
 function Process(e: IInterface): integer;
 	begin
-		slFiles.AddObject(GetFileName(e),TObject(e));
+		slFiles.Append(GetFileName(e));
 		Result := 0;
 		BuildRef(e);
 	end;
@@ -67,7 +69,7 @@ function Process(e: IInterface): integer;
 function Finalize: integer;
 	var
 		i,z: Integer;
-		iFile, iRecord: IInterface;
+		iFile, iRecordTemp, iRecord: IInterface;
 		slTemp: TStringList;
 	begin
 		slTemp := TStringList.Create;
@@ -84,17 +86,9 @@ function Finalize: integer;
 		AddMessage('IgnModEVs: '+BoolToStr(IgnModEVs));
 		AddMessage('IgnEmptyEVs: '+BoolToStr(IgnEmptyEVs));
 		AddMessage('TestMode: '+BoolToStr(TestMode));
-		for i:=0 to Pred(slFiles.Count) do begin
-			iFile := ObjectToElement(slFiles.Objects[i]);
-			GrabRecordsInFile(iFile,RecordType,IgnOverrides,slQueue);
-		end;
-		AddMessage(slQueue.DelimitedText);
-		FilterByComparisons(slSearchIn,slCheckFor,slQueue, LogicOperator);
-		AddMessage(slQueue.DelimitedText);
-		for z := Pred(slQueue.Count) downto 0 do begin;
-			iRecord := ObjectToElement(slQueue.Objects[z]);
-			if not Assigned(iRecord) then continue;
-			ModifyRecord(iRecord,slModElements,slModTypes,slModEVs);
+		for i:=Pred(slFiles.Count) downto 0 do begin
+			iFile := FileByName(slFiles[i]);
+			GrabRecordsInFileAndModify(iFile,RecordType,IgnOverrides,IgnModRecords,slQueue);
 		end;
 		slTemp.free;
 		ClearGlobals();
@@ -109,37 +103,87 @@ Procedure ClearGlobals();
 		slModElements.free;
 		slModTypes.free;
 		slModEVs.free;
+		slQueue.free;
+		slNextQueue.free;
 	end;
 
-Procedure GrabRecordsInFile(iFile:IInterface;sGRUP:String;bOverrides:Boolean;slQ:TStringList);
+Procedure GrabRecordsInFileAndModify(iFile:IInterface;sGRUP:String;bIgnOverrides,bIgnModified:Boolean;slQ:TStringList);
 	var
 		i:Integer;
 		sFormID:String;
 		iGRUP,iRecord: IInterface;
 	begin
+																					DBOut(Dash+'Inside GrabRecordsInFile',1);
 		if not Assigned(iFile) then exit;
+																					DBOut('Passed File Assiged check',2);
 		if not HasGroup(iFile,sGRUP) then exit;
+																					DBOut('Passed GRUP Assiged check',2);
 		iGRUP := GroupBySignature(iFile,sGRUP);
+																					DBOut('Group ElementCount: '+IntToStr(Pred(ElementCount(iGRUP))),2);
 		for i := 0 to Pred(ElementCount(iGRUP)) do begin
+			
 			iRecord := ElementByIndex(iGRUP,i);
-			AddMessage(Name(iRecord));
-			if (bOverrides = false) then begin
-				if (not IsMaster(iRecord)) or (not IsInjected(iRecord)) then exit;
+																					DBOut('Element: '+Name(iRecord),2);
+			if bIgnOverrides then begin
+																					DBOut('Inside Override Check',2);
+				if not IsMaster(iRecord) then begin
+																					DBOut('Skipping: Record Is Override',2);
+					continue;
+				end; 
+			end;
+			if bIgnModified then begin
+																					DBOut('Inside Modified Check',2);
+				if GetElementState(iRecord, esModified) <> 0 then begin
+																					DBOut('Skipping: Record Is Flagged Modified',2);					
+				continue;
+				end;
 			end;
 			sFormID := IntToStr(GetLoadOrderFormID(iRecord));
-			if slQ.IndexOf(sFormID) > (-1) then continue;
-			slQ.AddObject(HexFormID(iRecord),TObject(iRecord));
+			if (slQ.IndexOf(sFormID) > (-1)) then continue;
+			if Matches(iRecord,slSearchIn,slCheckFor,LogicOperator) then begin
+				slQ.Append(sFormID);
+				ModifyRecord(iRecord,slModElements,slModTypes,slModEVs);
+			end;
 		end;
-
 	end;
 
-Procedure FilterByComparisons(slSI,slCF,slQ:TStringList; sOperator:String);
+Function Matches(iElement: IInterface; slSI,slCF:TStringList; sOperator:String):Boolean;
+	var
+	i,z:Integer;
+	slBool: TStringList;
+	bComparison: Boolean;
+	begin
+																			DBOut(Dash+'Inside Matches',1);
+		Result := false;
+		slBool := TStringList.Create;
+		for z := 0 to Pred(slSI.Count) do begin
+			bComparison := CompareElement(iElement,slSI[z],slCF[z]);
+			slBool.Append(BoolToStr(bComparison));
+		end;
+		if SameText(sOperator,'lAND') then begin
+			if slBool.IndexOf('False') = -1 then Result := true;
+		end else
+		if SameText(sOperator,'lOR') then begin
+			if slBool.IndexOf('True') > -1 then Result := true;
+		end else
+		if SameText(sOperator,'lNOTAND') then begin
+			if slBool.IndexOf('True') = -1 then Result := true;
+		end else
+		if SameText(sOperator,'lNOTOR') then begin
+			if slBool.IndexOf('False') > -1 then Result := true;
+		end;
+
+		slBool.Free;
+	end;
+
+Procedure FilterByComparisons(slSI,slCF,slQ,slNQ:TStringList; sOperator:String);
 	var
 		i,z:Integer;
 		iElement: IInterface;
 		slBool: TStringList;
 		bComparison:Boolean;
 	begin
+																					DBOut(Dash+'Inside FilterByComparisons',1);
 		slBool := TStringList.Create;
 		bComparison := true;
 		for i := Pred(slQ.Count) downto 0 do begin
@@ -147,22 +191,21 @@ Procedure FilterByComparisons(slSI,slCF,slQ:TStringList; sOperator:String);
 			while (i > Pred(slQ.Count)) do begin
 				Pred(i);
 			end;
-			iElement := ObjectToElement(slQ.Objects[i]);
 			for z := 0 to Pred(slSI.Count) do begin
 				bComparison := CompareElement(iElement,slSI[z],slCF[z]);
 				slBool.Append(BoolToStr(bComparison));
 			end;
 			if SameText(sOperator,'lAND') then begin
-				if slBool.IndexOf('False') > -1 then slQ.Delete(i);
+				if slBool.IndexOf('False') > -1 then slNQ.AddObject();
 			end else
 			if SameText(sOperator,'lOR') then begin
-				if slBool.IndexOf('True') > -1 then continue else slQ.Delete(i);
+				if slBool.IndexOf('True') = -1 then slQ.Delete(i);
 			end else
 			if SameText(sOperator,'lNOTAND') then begin
 				if slBool.IndexOf('True') > -1 then slQ.Delete(i);
 			end else
 			if SameText(sOperator,'lNOTOR') then begin
-				if slBool.IndexOf('False') > -1 then continue else slQ.Delete(i);
+				if slBool.IndexOf('False') = -1 then slQ.Delete(i);
 			end;
 			slBool.Clear;
 		end;
@@ -182,28 +225,34 @@ Function CompareElement(iElement:IInterface; sElePath, sContains:String): Boolea
 Procedure ModifyRecord(iRecord: IInterface;slMEs,slMTs,slMEVs:TStringList);
 	var
 		i,z: Integer;
-		iElement: IInterface;
+		iElement, iNewRecord: IInterface;
 	begin
 		If TestMode then AddMessage('Modifying Record: '+ShortName(iRecord));
 		for i := 0 to Pred(slMEs.Count) do begin
-			iElement := ElementByPath(iRecord,slMEs[i]);
+			iElement := ElementByIP(iRecord,slMEs[i]);
 			if Assigned(iElement) then begin
+																					DBOut('Assigned Element: '+Name(iElement),2);
 				if TestMode then AddMessage('Modifying Element: '+Name(iElement));
 				ModifyElement(iRecord,iElement,slMTs[i],slMEs[i],slMEVs[i]);
 			end else
 			if (IgnEmptyEVs = false) then begin
 				if TestMode then AddMessage('Modifying Element: '+Name(iElement));
-				iElement := Add(iRecord, slMEs[i], false);
+				iElement := Add(iRecord,slMEs[i],true);
+				Add(iRecord, Name(iElement), true);
+				iElement := ElementByIP(iRecord, slMEs[i]);
+																					DBOut('Added Element: '+Name(iElement),2);
 				ModifyElement(iRecord,iElement,slMTs[i],slMEs[i],slMEVs[i]);
 			end;
 		end; 
 	end;
 
-Procedure ModifyElement(iRecord,iElement:IInterface;sMT,sME,sMEV:String);
+Procedure ModifyElement(var iRecord:IInterface;var iElement:IInterface;sMT,sME,sMEV:String);
 	var
 		sEV,sEVReplace: String;
 		iNewElement: IInterface;
 	begin
+																					DBOut(Dash+'Inside ModifyElement',1);
+																					DBOut(Format('sMT: %s  sME: %s  sMEV: %s',[sMT,sME,sMEV]),1);
 		sEV := GetEditValue(iElement);
 		if IgnModEVs then begin
 			if GetElementState(iElement, esModified) <> 0 then begin
@@ -242,12 +291,19 @@ Function DoTestMode(sBefore,sAfter:String):Boolean;
 		AddMessage('     After:	'+ sAfter);
 	end;
 	
-procedure ReadOutSl(prepend: String; sl:TStringList);
+Procedure ReadOutSl(prepend: String; sl:TStringList);
 	var
 		i: Integer;
 	begin
 		for i := 0 to Pred(sl.Count) do begin
 			AddMessage(prepend+' '+sl[i]);
 		end;
+	end;
+
+Procedure DBOut(s:String; lvl:integer);
+	begin
+		if DebugLevel > (-1) then
+			if lvl > DebugLevel then 
+				AddMessage(s);
 	end;
 end.
