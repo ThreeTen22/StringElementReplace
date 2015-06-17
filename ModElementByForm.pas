@@ -64,7 +64,7 @@ function Initialize: integer;
 		slModTypes := TStringList.Create; 	 slModTypes.StrictDelimiter := true; 	slModTypes.DelimitedText := ModTypes;	
 		slModEVs := TStringList.Create; 	 slModEVs.StrictDelimiter := true; 		slModEVs.DelimitedText := ModEVs;
 		slQueue := TStringList.Create;		 slQueue.StrictDelimiter := true;
-		slTest := TStringList.Create;		 slTest.StrictDelimiter := true;		slTest.Delimiter := #13#10;						slTest.
+		slTest := TStringList.Create;		 slTest.StrictDelimiter := true;		slTest.Delimiter := #13#10;
 		ScriptProcessElements := [etFile];
 	If TestMode then begin
 		bDoubleEle := HasDuplicates(slModElements);
