@@ -4,20 +4,25 @@
 Here is the basic layout of StringElementReplace:
 
 //---------File Selection ---------------
+
 	    Files = ''; (leave blank for now - Placeholder for GUI later)
 
 //---------Record Selection----------------
+
     RecordTypes = 'QUST';
    IgnOverrides = false;
   IgnModRecords = false;     
 
 //------ Element/Comparison Selection ----------
+
        SearchIn = 'EDID,FULL';
        CheckFor = 'TS_,TSNAME_';
 //------ Element Comparisons ----------
+
   LogicOperator = 'lAND';
 
 //------ Element Modifications -------
+
     ModElements = 'FLTR, EDID';
        ModTypes = '[mtOv], Test';	
          ModEVs = 'Generic\Scenes, ReplacementTest'; 
@@ -28,6 +33,7 @@ Here is the basic layout of StringElementReplace:
 
 
 //------Record Selection---------------------------------------------------------------
+
 RecordType: 
 What type of record you want the script to search for.  It will check every record of that type in all of 
 the files you provided.  Can only provide one record type at a time.
@@ -40,21 +46,27 @@ If true, will ignore any records which have had their elements modified in your 
 
 In the example above, it will look through yourmod.esp and grab all QWST records and look at each one.
 
+
 //------ Element/Comparison Selection -------------------------------------------------------------------
+
 SearchIn: 
 Will Search inside of all elements you provide it. Separated by commas.
+
 
 CheckFor: 
 The phrases which you will check, each phrase is connected to an element in SearchIn.  So the first phrase will be used on the first element in SearchIn,  The 2nd phrase on the 2nd element in SearchIn etc.
 
+
 In the example above the EditorID will be checked for the phrase "_TS" and the Full Name will be checked for the phrase "TSNAME_"
 
 //------ Element Comparisons ------------------------------------------------------------------
+
 LogicOperator: 
 'Determines how the script will handle multiple comparisons.  Only one may be chosen.'
     lOR = 'Record will be modified if any comparison is true.'
     lAND = 'Record will be modified only if all comparisons are true'
     lNOTAND = 'Record will be modified only if all of the comparisons are false.'
+
 
 In the example above, it will check if "TS_" is found in each quests EditorID (EDID). It will also check 
 if "TSNAME_" is in its Display Name(NAME).  The EditorID and Display Name must contain "TS_" and "TSNAME_" 
@@ -64,6 +76,7 @@ respectively in order for the record to be modified.
 ModElements: 
 List the Elements which you wish to be modified if the logical comparisons are true.  In the example 
 above,the Object List Filter and Editor ID will be modified.
+
 
 ModTypes: 
 /*Each Modtype determines how the Edit Values of each element in ModElements will be modified.*/
