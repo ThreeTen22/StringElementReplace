@@ -12,7 +12,6 @@ Here is the basic layout of StringElementReplace:
     RecordTypes = 'QUST';
    IgnOverrides = false;
   IgnModRecords = false;     
-
 //------ Element/Comparison Selection ----------
 
        SearchIn = 'EDID,FULL';
@@ -20,7 +19,6 @@ Here is the basic layout of StringElementReplace:
 //------ Element Comparisons ----------
 
   LogicOperator = 'lAND';
-
 //------ Element Modifications -------
 
     ModElements = 'FLTR, EDID';
