@@ -41,7 +41,7 @@ If true, will ignore all override records.
     IgnModRecords: 
 If true, will ignore any records which have had their elements modified in your current TES5Edit Session.
 
-In the example above, it will look through yourmod.esp and grab all QWST records and look at each one.
+In the example above, it will look through yourmod.esp and grab all QUST records and look at each one.
 
 
 //------ Element/Comparison Selection -------------------------------------------------------------------
@@ -87,7 +87,7 @@ Each Modtype determines how the Edit Values of each element in ModElements will 
                     will skip that element.
                     
 
-In the example above,  it will completely replace the FLTR of any matching record with  "Generic\Scenes".  It will also look inside of the record's Editor ID for the phrase "Test".
+In the example above,  it will completely replace the FLTR Element.  It will also look inside of the record's Editor ID for the phrase "Test".
 
     ModEVs: 
 This will contain the phrases which will either append, prepend or replace the current Edit Value of that 
