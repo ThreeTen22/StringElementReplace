@@ -11,14 +11,18 @@ Here is the basic layout of StringElementReplace:
 
     RecordTypes = 'QUST';
    IgnOverrides = false;
-  IgnModRecords = false;     
+  IgnModRecords = false;
+
 //------ Element/Comparison Selection ----------
 
        SearchIn = 'EDID,FULL';
        CheckFor = 'TS_,TSNAME_';
+
 //------ Element Comparisons ----------
 
   LogicOperator = 'lAND';
+
+
 //------ Element Modifications -------
 
     ModElements = 'FLTR, EDID';
@@ -26,8 +30,6 @@ Here is the basic layout of StringElementReplace:
          ModEVs = 'Generic\Scenes, ReplacementTest'; 
       IgnModEVs = false;
     IgnEmptyEVs = false;
-
-
 
 
 //------Record Selection---------------------------------------------------------------
