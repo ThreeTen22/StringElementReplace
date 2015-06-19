@@ -53,7 +53,8 @@ Will Search inside of all elements you provide it. Separated by commas.
 The phrases which you will check, each phrase is connected to an element in SearchIn.  So the first phrase will be used on the first element in SearchIn,  The 2nd phrase on the 2nd element in SearchIn etc.
 
 
-In the example above the EditorID will be checked for the phrase "_TS" and the Full Name will be checked for the phrase "TSNAME_"
+In the example above the EditorID will be checked for the phrase "_TS" 
+The Full Name will be checked for the phrase "TSNAME_"
 
 
 //------ Element Comparisons ------------------------------------------------------------------
