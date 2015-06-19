@@ -11,7 +11,6 @@ Here is the basic layout of StringElementReplace:
     RecordTypes = 'QUST';
    IgnOverrides = false;
   IgnModRecords = false;     
-
 //------ Element/Comparison Selection ----------
 
        SearchIn = 'EDID,FULL';
