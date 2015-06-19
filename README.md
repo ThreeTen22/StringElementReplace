@@ -54,6 +54,7 @@ The phrases which you will check, each phrase is connected to an element in Sear
 
 
 In the example above the EditorID will be checked for the phrase "_TS" 
+
 The Full Name will be checked for the phrase "TSNAME_"
 
 
