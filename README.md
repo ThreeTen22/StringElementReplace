@@ -101,5 +101,5 @@ For it's editor ID it will look for the phrase "Test" and, if found, it will rep
 Skip any EV that has already been modified during the current tes5edit session.
 
     IgnEmptyEVs: 
-Will skip any modifications to EVs which contain no data.  Useful for when we want to prepend EVs while 
+Will skip any modifications to EVs which contain no data.  Useful for when we want to modify preexisting EVs while 
 keeping the ones we want empty to stay that way.
